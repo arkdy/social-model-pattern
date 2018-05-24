@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1208941551">
+      <usages-collector id="statistics.actions.runAnything">
+        <counts>
+          <entry key="RunAnything - execution - Rake tasks" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="JavaScriptSettings">
+    <option name="languageLevel" value="ES6" />
+  </component>
+  <component name="ProjectRootManager" version="2" project-jdk-name="rbenv: 2.4.2" project-jdk-type="RUBY_SDK" />
+</project>

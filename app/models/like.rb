@@ -14,4 +14,6 @@ class Like < ApplicationRecord
   belongs_to :account
   belongs_to :likeable, polymorphic: true
   belongs_to :post, optional: true #?
+
+  validates :likeable_id, uniqueness: {scope: :account_id}
 end

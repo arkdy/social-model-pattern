@@ -23,7 +23,7 @@ class Account < ApplicationRecord
     begin
     following_relationships.create(following_id: account.id)
     rescue ActiveRecord::RecordNotUnique => e
-      puts "duplicated record fo Account.id=#{account.id}"
+      puts "\r   duplicated record fo Account.id=#{account.id}"
     end
   end
 
@@ -37,6 +37,28 @@ class Account < ApplicationRecord
       follow(Account.find(rand(1..max_qty)))
     end
   end
+
+  def like(object)
+    begin
+    likes.create! likeable: object
+    rescue ActiveRecord::RecordInvalid => e
+      puts "Likeable has already been taken (Object id=#{object.id})"
+      false
+    end
+  end
+
+  def generate_likes(number)
+    max_qty = Post.count
+    number.times do
+      like Post.find(rand(1..max_qty))
+    end
+  end
+
+  # def generate_posts(number)
+  #   number.times do
+  #     Post.create
+  #   end
+  # end
 
 end
 

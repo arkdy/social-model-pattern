@@ -15,4 +15,5 @@ class Post < ApplicationRecord
 
   has_many :likes, as: :likeable
   has_many :liking_users, through: :likes, source: :account
+
 end

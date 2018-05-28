@@ -50,62 +50,131 @@
 
 puts "== Seeding DB"
 
-a1 = Account.create
-a2 = Account.create
-a3 = Account.create
-a4 = Account.create
-a5 = Account.create
-a6 = Account.create
+#a1 = Account.create
+#a2 = Account.create
+#a3 = Account.create
+#a4 = Account.create
+#a5 = Account.create
+#a6 = Account.create
 
-p1 = a1.posts.create
-p2 = a2.posts.create
-p3 = a3.posts.create
-p4 = a4.posts.create
-p5 = a5.posts.create
-p6 = a1.posts.create
-p7 = a2.posts.create
-p8 = a2.posts.create
+#p1 = a1.posts.create
+#p2 = a2.posts.create
+#p3 = a3.posts.create
+#p4 = a4.posts.create
+#p5 = a5.posts.create
+#p6 = a1.posts.create
+#p7 = a2.posts.create
+#p8 = a2.posts.create
 
-a1.follow a2
-a1.follow a3
-a3.follow a1
-a2.follow a1
+#a1.follow a2
+#a1.follow a3
+#a3.follow a1
+#a2.follow a1
 
-a3.follow a4
-a3.follow a6
-a6.follow a3
+#a3.follow a4
+#a3.follow a6
+#a6.follow a3
 
-a4.follow a5
-a4.follow a6
-a6.follow a4
-
-
-a1.likes.create likeable: p1
-a1.likes.create likeable: p2
-a1.likes.create likeable: p3
-
-a3.likes.create likeable: p4
-a3.likes.create likeable: p5
-a3.likes.create likeable: p6
-
-a6.likes.create likeable: p7
-a6.likes.create likeable: p8
+#a4.follow a5
+#a4.follow a6
+#a6.follow a4
 
 
+#a1.likes.create likeable: p1
+#a1.likes.create likeable: p2
+#a1.likes.create likeable: p3
 
-POSTS = 100
-ACCOUNTS = 50
-MAX_FOLLOWERS_PER_ACC = 10
-MAX_LIKES_PER_POST = 10
+#a3.likes.create likeable: p4
+#a3.likes.create likeable: p5
+#a3.likes.create likeable: p6
+
+#a6.likes.create likeable: p7
+#a6.likes.create likeable: p8
+
+
+ACCOUNTS = 50000
+MAX_FOLLOWERS_PER_ACC = 50
+
+MIN_LIKES_PER_POST = 50
+MAX_LIKES_PER_POST = 200
+
+MIN_POSTS_PER_ACC = 50
+MAX_POSTS_PER_ACC = 150
 
 STDOUT.write "\a"
 STDOUT.write "\n== Do you want populate DB with #{ACCOUNTS} users? [y/n] "
 answer = STDIN.gets.chomp
 if answer == "y"
+  accounts = []
+
   (1..ACCOUNTS).each do |i|
-    a = Account.create
-    followers_qty = rand(1..MAX_FOLLOWERS_PER_ACC)
-    a.generate_relations_from(followers_qty)
+    accounts << {id: i}
     STDOUT.write "\r   Generated #{i} of #{ACCOUNTS}"
   end
+  puts "....Importing to DB...                        "
+  Account.import accounts, batch_size: 1000
+
+  follows = []
+
+  (1..ACCOUNTS).each do |i|
+
+    (rand(MAX_FOLLOWERS_PER_ACC..MAX_FOLLOWERS_PER_ACC * 3)).times do
+      follows << {following_id: rand(1..ACCOUNTS), follower_id: i}
+    end
+    STDOUT.write "\r   Generated followers for account #{i} of #{ACCOUNTS}"
+
+  end
+
+  puts "....Importing #{follows.count} follows to DB..."
+
+  Follow.import follows, validate: false, on_duplicate_key_ignore: true, batch_size: 1000
+
+end
+
+puts "\a"
+STDOUT.write "\n== Do you want populate DB with posts? [y/n] "
+answer = STDIN.gets.chomp
+if answer == "y"
+
+  posts = []
+
+  (1..ACCOUNTS).each do |i|
+    rand(MIN_POSTS_PER_ACC..MAX_POSTS_PER_ACC).times do
+      posts << {account_id: i}
+    end
+    STDOUT.write "\r   Generated posts for account #{i} of #{ACCOUNTS}"
+  end
+
+  puts "....Importing #{posts.count} posts to DB..."
+
+  #Post.import posts, validate: false, on_duplicate_key_ignore: true, batch_size: 1000
+
+
+  likes = []
+
+  (1..ACCOUNTS).each do |i|
+    rand(MIN_LIKES_PER_POST..MAX_LIKES_PER_POST).times do
+      likes << {likeable_type: 'Post', likeable_id: rand(1..posts.count), account_id: i}
+    end
+    STDOUT.write "\r   Generated likes for account #{i} of #{ACCOUNTS}"
+  end
+
+  puts "....Importing #{likes.count} likes to DB..."
+
+  Like.import likes, validate: false, on_duplicate_key_ignore: true, batch_size: 1000
+
+  #
+  # Account.find_each do |account|
+  #
+  #   POSTS_PER_ACC.times {account.posts.create}
+  #   STDOUT.write "\r   Generated posts for account.id=#{account.id} of #{ACCOUNTS}"
+  # end
+  #
+  # puts "== Generating likes for posts"
+  #
+  # Account.find_each do |account|
+  #   account.generate_likes(rand(MAX_LIKES_PER_POST..MAX_LIKES_PER_POST * 2))
+  #   STDOUT.write "\r   Generated likes for posts of account.id=#{account.id} of #{ACCOUNTS}"
+  # end
+
 end
